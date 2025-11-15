@@ -1,0 +1,36 @@
+name: Fetch Opinion Page
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium
+
+      - name: Run Fetcher
+        run: node fetch.js
+
+      - name: Commit Files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add saved/*
+          git commit -m "Saved rendered HTML" || echo "Nothing to commit"
+          git push
