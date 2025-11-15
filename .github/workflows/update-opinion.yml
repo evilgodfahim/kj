@@ -18,14 +18,32 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Playwright
+      - name: Fetch Opinion via Worker
         run: |
-          npm init -y
-          npm install playwright
-          npx playwright install chromium
+          mkdir -p saved
+          curl -s ${{ secrets.JK }} -o saved/opinion.html
 
-      - name: Run Fetcher
-        run: node fetch.js
+      - name: Regenerate index.html
+        run: |
+          cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Latest Opinion Snapshot</title>
+<style>
+body { font-family: sans-serif; margin: 40px; background: #fafafa; }
+a { text-decoration: none; color: #0066cc; }
+a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<h1>Latest Opinion Page Snapshot</h1>
+<p><a href="saved/opinion.html">Click here to view the most recent saved page</a></p>
+<p>This file overwrites itself every hour.</p>
+</body>
+</html>
+EOF
 
       - name: Commit Files
         run: |
